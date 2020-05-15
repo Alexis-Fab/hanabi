@@ -1,0 +1,42 @@
+
+Cas où partenaire full cartes importantes et plus bcp d'indices
+
+Le 5 est tjr considéré comme un indice de prévention, jamais d'exécution (puisque c'est une carte cruciale). Hors en fin de partie il peut devenir judicieux de poser un nouveau 5
+
+Vérifier qu'il n'y a jamais de triche lorsqu'on fait appel à is_playable, number ou color sur la main courante
+
+checker si une couleur est morte (au sens où tous les exemplaires d'une carte ont été défaussés)
+les bombes de couleurs sont pertinentes. Celles basées sur les indices de numéro le sont-elles ? a priori oui
+recevoir un discardable clue signifie que la chop card est cruciale ? a priori non mais c'est une piste de réflexion. Par exemple si le joueur pouvait pourtant jouer
+Les cartes cruciales sont-elles nécessairement non jouables ? Au moment où elles sont définies oui, mais quelque tours plus tard elles peuvent devenir jouables (peut être que c'est déjà pris en compte)
+Définir une fonction comme last_rep mais qui ne connaît qu'un seul indice (par ex color_clue connu et toutes les cartes restantes de cette couleur sont importantes)
+Donne un indice 1 avant de jouer une bombe 1 ? A voir
+situation_is_risky ne prend pas en compte la bombe jouée au prochain tour. La situation est pourtant risquée dans un tel cas
+Pb sur nb_bombs dans num_clue_score en cas de cartes identiques (j'ai du le corriger je crois)
+
+optimiser le random clue (donner une carte qui vérifie not possibly_playable, ou bien un indice pour completer une bombe)
+Ne pas définir les cartes cruciales dans le cas d'un random_clue. (Comment savoir ? Jetons indices au max ?)
+Si le robo possède une bombe jaune, qu'il fait poser la carte jaune attendue par son partenaire, il doit alors oublier sa bombe qui n'est plus jouable.
+(idem ligne ci-dessus formulé autrement) : Le robot donne un indice avant de jouer une bombe mais il peut indiquer une carte indentique à sa bombe (surtout les 1)
+Lors de playable clues, parfois il vaut mieux donner 2 clues et 1 bomb que 1 clue seul (selon le nbr de jeton bleu ?)
+Il vaut mieux éviter de défausser deux 1 d'une couleur même s'il y en a trois. A prendre en compte peut-être dans situation risky.
+Faire des unitests pour nos robots ? (LOL ?)
+Lorsque la fin de la partie approche, il vaut mieux dépenser tout ses indices avant de piocher la dernière carte.
+gestion des 5 :
+	donner indice 5 ou indice jouable ?? une carte jouable peut être défaussée !
+	donner l'indice seulement si 5 pas potentiellement jouable ? Suppose que le partenaire pose un nouveau 5 si jouable (sauf si donné un situation critique)
+	donner l'indice si situation critique (fait)
+	ne pas jouer si donné en situation critique (à faire ? seulement si risque d'être joué, cf rmq ci-dessus)
+	et donc donner l'indice si 5 est critique même si il est possiblement jouable ?
+	FIX ME robot ne donne pas l'indice "c5" si le partenaire possède des 1 mais qu'ils ont déjà été posés (à cause du choice != "c1" dans les conditions, à repenser mais condition utile pour les 1 jouables)
+
+les attributs "..at_all_costs" sont sans doute redondants, à épurer (question de complexité, osef)
+clue_score à améliorer ! (quid si une carte en amont est déjà connue ?) problème vient de conflit : conflit est True si une carte avec le même indice se trouve en amont alors qu'elle possède déjà un indice
+clue_score à améliorer : prendre en compte le fait de sauver une bombe en aval. Donner un indice et sauver une bombe en parallèle est-il valorisé ? (non pas pour l'instant)
+
+Rajouter :
+  . les indices colatéraux (Déductions faites de l'analyse de discard_piles, piles et other_hands, How?)
+(même idée)Rajouter les déductions complémentaires aux clue (ie celles-ci ne sont pas des 4, celle-là n'est pas verte)
+(idem)Penser plus tard à intégrer des déductions (plus q'une seule couleur possible..)
+
+  . les conséquences d'un punish (Comment savoir si la carte posée au tour précédent à réussie ? piste : game.moves)

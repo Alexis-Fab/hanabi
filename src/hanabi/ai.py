@@ -24,6 +24,8 @@ class AI:
         return list(itertools.chain.from_iterable([hand.cards for hand in self.other_hands]))
 
 
+
+
 class Cheater(AI):
     """
     This player can see his own cards!
@@ -134,4 +136,3 @@ class Cheater(AI):
         act = 'd%d'%myprecious[0][1]
         print('Cheater is doomed and must discard:', act, myprecious)
         return act
-

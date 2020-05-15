@@ -1,5 +1,7 @@
 """
-Hanabi deck and game engine.
+Hanabi deck and game engine module.
+
+See also the program hanabi.
 
 .. autosummary::
    Card
@@ -8,6 +10,7 @@ Hanabi deck and game engine.
    Game
 """
 
+import os
 import copy
 import random
 import readline  # this greatly improves `input`
@@ -41,8 +44,13 @@ class Color(Enum):
         return 'Color.'+self.name
 
     def colorize(self, *args):
-        "Colorize the given string"
-        return '\033[%im'%self.value + ' '.join(map(str, args)) + '\033[0m'
+        "Colorize and convert to str the given args."
+        s = ' '.join(map(str, args))
+        if os.name == 'posix':
+            return '\033[%im'%self.value + s + '\033[0m'
+        else:
+            # sorry, no colors on windows for the moment
+            return s
 
 
 class Card:
@@ -51,8 +59,10 @@ class Card:
         assert (1 <= number <= 5), "Wrong number"
         self.color = color
         self.number = number
-        self.color_clue = False
-        self.number_clue = False
+        self.color_clue = [False,0] # le nombre correspond au nombre de tours depuis que l'indice est donné
+        self.number_clue = [False,0]
+        self.bomb = False
+        self.crucial = False
 
     def __str__(self):
         return (str(self.color)[0] + str(self.number))
@@ -72,7 +82,7 @@ class Card:
 
     def str_clue(self):
         "What I know about this card."
-        return (self.color_clue or '*') + (self.number_clue or '*')
+        return (self.color_clue[0] or '*') + (self.number_clue[0] or '*')
 
 
 class Hand:
@@ -164,15 +174,22 @@ class Game:
 
         >>> import hanabi
         >>> game = hanabi.Game(players=2)
-        >>> # without AI, the user is prompted:
-        >>> game.turn()   # just one round
-        >>> game.run()    # or a whole game
-        >>>
-        >>> # if an AI is set, it will play the game:
+        >>> game.run()    # users play a whole game
+
+        >>> # if an AI is set, it will play the game automatically:
         >>> ai = hanabi.ai.Cheater(game)
-        >>> game.turn(ai)
         >>> game.ai = ai
         >>> game.run()
+
+        >>> # For debugging, a single player turn can be played:
+        >>> game = hanabi.Game(players=2)
+        >>> game.turn()  # Alice will be asked to play
+        >>> game.turn()  # and now Benji
+
+        >>> # Same with an AI:
+        >>> game = hanabi.Game(players=2)
+        >>> ai = hanabi.ai.Cheater(game)
+        >>> game.turn(ai)  # the ai will play just once
     """
 
     Players = ["Alice", "Benji", "Clara", "Dante", "Elric"]
@@ -268,6 +285,8 @@ class Game:
                 if choice.strip() == '':
                     continue
             elif isinstance(_choice, ai.AI):
+                # fixme: duck-typing seems more natural to students, as in
+                #     try: _choice.play() except AttributeError ...
                 choice = _choice.play()
             elif isinstance(_choice, str):
                 choice = _choice
@@ -355,7 +374,13 @@ class Game:
 
         clue[0] is within (12345RBGWY).
         By default, the clue is given to the next player (backwards compatibility with 2 payers games).
-        If clue[1] is give it is the initial (ABCDE) or index (1234) oof the target player.
+        If clue[1] is given it is the initial (ABCDE) or index (1234) of the target player.
+
+        Example::
+
+           hanabi> cWB    # is a white clue to Benji
+           hanabi> c1     # is a 1 clue to next player
+           hanabi> cRed   # is interpreted as a Red clue to Elric, probably not what you expected!
         """
 
         hint = clue[0].upper()  # so cr is valid to clue Red
@@ -372,18 +397,24 @@ class Game:
             target_index = 1
         target_index = int(target_index)
         if target_index == 0:
+            self.add_blue_coin()  # put back the blue coin
             raise ValueError("Cannot give a clue to yourself.")
 
         target_name = self.players[target_index]
 
         self.log(self.current_player_name, "gives a clue", hint, "to", target_name)
         #  player = clue[1]  # if >=3 players
+        targetted_card = False
         for card in self.hands[target_index].cards:
             if hint in str(card):
+                targetted_card = True
                 if hint in "12345":
-                    card.number_clue = hint
+                    card.number_clue[0] = hint
                 else:
-                    card.color_clue = hint
+                    card.color_clue[0] = hint
+        if not targetted_card:
+            self.add_blue_coin()  # put back the blue coin
+            raise ValueError("This clue is not valid (it matches no card in the target hand)")
         self.next_player()
 
     def examine_piles(self, *unused):
@@ -409,7 +440,7 @@ class Game:
     def next_player(self):
         """Switch to next player.
 
-        Player 0 is *always* the current_player
+        Player 0 is *always* the current_player.
         """
 
         if self.current_player is None:   # called at game setup
@@ -438,6 +469,8 @@ class Game:
 
     @property
     def score(self):
+        if self.red_coins >= 3:
+            return 0
         return sum(self.piles.values())
 
     def run(self):
@@ -478,6 +511,7 @@ moves = %r
      self.starting_deck,
      self.moves))
         # fixme: seems that a deck's repr is its list of cards?
+        f.close()
 
     def load(self, filename):
         """Load a saved game, replay the moves.
