@@ -5,8 +5,9 @@ from ai_almost_human_lvl3 import Robot_3
 #cd ..\src & python3 setup.py install --user & cd ..\test	
 
 #from hanabi import my_new_smart_ai
-N=150
+N=1000
 scores=[]
+nb_win = 0
 S=0
 failures = 0
 
@@ -24,6 +25,9 @@ for i in range(0,N):
 	scores.append(game.score)
 	if game.score == 0:
 		failures += 1
+	else:
+		nb_win += 1
 	S += game.score
-print(S/N)
-print("failures : ",failures)
+print("average score:",S/N)
+print("failures : ",(failures/N)*100,"%")
+print("average winning score:",S/nb_win)
