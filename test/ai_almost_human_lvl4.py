@@ -82,7 +82,7 @@ class Robot_3(AI):
                # self.log("clue_is_bomb",clue_is_bomb)
                 if card.color_clue[1] == 1:
                     if clue_is_bomb & (not card.number_clue[0]):
-                        #self.log(card,"is spotted as a bomb")
+                        self.log(card,"is spotted as a bomb")
                         card.bomb = True
                     clue_is_bomb = True
                 if card.number_clue[0]:
@@ -155,14 +155,35 @@ class Robot_3(AI):
             if not (card.color_clue[0] and card.number_clue[0]):
       #          self.log(card.number_clue[0],self.min_piles(),card.color_clue[0],card.bomb,self.is_playable(card))
                 if ( (not(not card.color_clue[0])) or (not(not(card.number_clue[0])))) & (not card.bomb) & (not card.crucial):
+                    
                     if card.number_clue[0] != False:
                         if self.possibly_playable(int(card.number_clue[0])):
+                            indicateur = None                                       #indique si la carte sélectionnée se trouve malheureusment être la prochaine bombe à être jouée par le partenaire: s'il joue la même après le robot, c'est red coin
+                            for ind_other_hand in range(0,len(self.other_hands)):
+                                other_hand = self.other_hands[ind_other_hand]
+                                for ind_other_card in range(len(other_hand.cards)-1,-1,-1):
+                                    other_card = other_hand.cards[ind_other_card]
+                                    if (other_card.bomb and (indicateur == None)):
+                                        indicateur = False                          #indicateur indique que la première bombe en partant de la droite est atteinte mais que, pour l'instant, rien ne dit que c'est la même que celle que le robot veut jouer
+                                        if (other_card.number_clue[0] == card.number_clue[0]):
+                                            indicateur = True
                             #self.log("robot trusts its comrade and plays a no bomb and no crucial card with an acceptable number_clue")
-                            return("p%d"%(ind_card+1))
+                            if (indicateur != True):
+                                return("p%d"%(ind_card+1))
                     if card.color_clue[0] != False:
                         if game.piles[card.color] < 5:
+                            indicateur = None                                       #indique si la carte sélectionnée se trouve malheureusment être la prochaine bombe à être jouée par le partenaire: s'il joue la même après le robot, c'est red coin
+                            for ind_other_hand in range(0,len(self.other_hands)):
+                                other_hand = self.other_hands[ind_other_hand]
+                                for ind_other_card in range(len(other_hand.cards)-1,-1,-1):
+                                    other_card = other_hand.cards[ind_other_card]
+                                    if (other_card.bomb and (indicateur == None)):
+                                        indicateur = False                          #indicateur indique que la première bombe en partant de la droite est atteinte mais que, pour l'instant, rien ne dit que c'est la même que celle que le robot veut jouer
+                                        if (other_card.color_clue[0] == card.color_clue[0]):
+                                            indicateur = True
                             #self.log("robot trusts its comrade and plays a no bomb and no crucial card with an acceptable color_clue")
-                            return("p%d"%(ind_card+1))
+                            if (indicateur != True):
+                                return("p%d"%(ind_card+1))
 
     def try_to_play_a_bomb(self):
         """Joue une carte bombe si elle est jouable, en partant de la droite"""
@@ -187,7 +208,7 @@ class Robot_3(AI):
         (nb_clues_given,nb_bombs_given) = (0,5)
         for ind_hand in range(0,len(self.other_hands)):
             hand = self.other_hands[ind_hand]
-            for ind_card in range(0,len(hand.cards)):
+            for ind_card in range(len(hand.cards)-1,-1,-1):
                 card = hand.cards[ind_card]
                 
     #                    print(card," is a bomb ? ",card.bomb)
