@@ -15,6 +15,10 @@ class Robot_3(AI):
         game = self.game
         #self.log(game.examine_piles())
         have_clue = self.have_clue() # cela met à jour les indices et les bombes FIX ME ne devraient pas identifier les cartes cruciales comme des bombes ! Nécessite set_crucial_cards avent.. Séparer have_clue de set_bombs ?
+        for ind_card in range(len(game.current_hand.cards)-1,-1,-1):
+            card = game.current_hand.cards[ind_card]
+            if card.bomb:
+                self.log(card,"=bomb")
         self.set_crucial_cards() # cela identifie les cartes cruciales, nécessite d'avoir mis à jour les indices (have_clue)
         risk = self.situation_is_risky()
         #self.log("risk is",risk)
@@ -39,7 +43,7 @@ class Robot_3(AI):
             temp = self.try_to_play_card_safely()
             #self.log("play_safely = ",temp)
             if temp != None:
-                #self.log("Robot plays safely")
+                self.log("Robot plays safely")
                 return(temp)
         if game.blue_coins > 0:
             temp = self.give_playable_clue()
@@ -49,7 +53,7 @@ class Robot_3(AI):
 
         temp = self.try_to_play_a_bomb()
         if temp != None:
-           # self.log("Robot tries to play a bomb")
+            self.log("Robot tries to play a bomb")
             return(temp)
 
         if game.blue_coins == 8:
@@ -57,7 +61,7 @@ class Robot_3(AI):
             if temp != None:
                 #self.log("Robot gives a discardable clue")
                 return(temp)
-            #self.log("Robot gives a random clue") # FIX ME réfléchir à une optimisation
+            self.log("Robot gives a random clue") # FIX ME réfléchir à une optimisation
             return(self.give_random_clue())
         self.log("Robot should discard")
         return(self.discard_at_all_costs(game.current_hand))
@@ -92,7 +96,7 @@ class Robot_3(AI):
                # self.log("clue_is_bomb",clue_is_bomb)
                 if card.number_clue[1] == 1:
                     if clue_is_bomb & (not card.color_clue[0]):
-                       # self.log(card,"is spotted as a bomb")
+                        self.log(card,"is spotted as a bomb")
                         card.bomb = True
                     clue_is_bomb = True
                 if card.color_clue[0]:
@@ -157,7 +161,7 @@ class Robot_3(AI):
                             return("p%d"%(ind_card+1))
                     if card.color_clue[0] != False:
                         if game.piles[card.color] < 5:
-                           # self.log("robot trusts its comrade and plays a no bomb and no crucial card with an acceptable color_clue")
+                            #self.log("robot trusts its comrade and plays a no bomb and no crucial card with an acceptable color_clue")
                             return("p%d"%(ind_card+1))
 
     def try_to_play_a_bomb(self):
@@ -236,7 +240,8 @@ class Robot_3(AI):
                         if bomb_choice == None:
                             bomb_card = card
                             bomb_choice = ("c%d"%(card.number))
-                        if self.last_rep(card) & ((not self.last_rep(bomb_card)) or (bomb_card.number < card.number)):
+                        else:
+                        #if self.last_rep(card) & ((not self.last_rep(bomb_card)) or (bomb_card.number < card.number)):
                             bomb_card = card
                             bomb_choice = ("c%d"%(card.number))
                 if (card.number == 5) & (not card.number_clue[0]) & (not self.possibly_playable(5)) & (choice is None): #FIX ME le choix c5 devrait se faire en dehors de la boucle pour juger correctement
@@ -255,7 +260,7 @@ class Robot_3(AI):
                 self.log("robot gives %d clues and %d bombs"%(nb_clues_given,nb_bombs_given))
                 return(choice)
             elif bomb_choice != None:
-                self.log("robot saves a bomb")
+                self.log("robot chooses to save a bomb instead of other choice")
                 return(bomb_choice)
             return (choice)
 
