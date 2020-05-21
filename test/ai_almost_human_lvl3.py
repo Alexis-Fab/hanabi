@@ -63,7 +63,7 @@ class Robot_3(AI):
         return(self.discard_at_all_costs(game.current_hand))
 
     def have_clue(self):
-        """Retourne un booléen indiquant si le robot a des indices, et détermine les bombes de son jeu en les analysant"""
+        """Retourne un booleen indiquant si le robot a des indices, et détermine les bombes de son jeu en les analysant"""
         self.log("Robot looks for clues")
         game = self.game
         res = False
@@ -129,7 +129,7 @@ class Robot_3(AI):
 
 
     def is_playable(self,card): # retourne si la carte peut être jouée sans risque
-        """Retourne un booléen indiquant si la carte est jouable compte-tenu de la configuration actuelle des piles"""
+        """Retourne un booleen indiquant si la carte est jouable compte-tenu de la configuration actuelle des piles"""
         game = self.game
         return(card.number == (game.piles[card.color]+1))
 
@@ -365,7 +365,7 @@ class Robot_3(AI):
             return(False)
 
     def last_rep(self,card):
-        """Retourne un booléen indiquant si la carte est la dernière de sa nature dans la jeu"""
+        """Retourne un booleen indiquant si la carte est la dernière de sa nature dans la jeu"""
         game = self.game
         if card.number == 5:
             return(True)
@@ -375,7 +375,7 @@ class Robot_3(AI):
             return(game.discard_pile.cards.count(card) == 2)
 
     def conflit(self,hand,ind_card,c):
-        """Retourne un booléen indiquant si dans le reste de la main (à gauche de la carte), il y a une carte de même couleur ou chiffre que la couleur/le chiffre c"""
+        """Retourne un booleen indiquant si dans le reste de la main (à gauche de la carte), il y a une carte de même couleur ou chiffre que la couleur/le chiffre c"""
         game = self.game
         for i in range(ind_card + 1, len(hand.cards)):
             self.log(str(hand.cards[i].number) == c,str(hand.cards[i].color)[0] == c)
@@ -402,7 +402,7 @@ class Robot_3(AI):
         return(max)
 
     def possibly_playable(self,value): # et si c'est une couleur qui n'est pas jouable ? Ca traite seulement le numéro
-        """Retourne un booléen indiquant si le numéro indiqué est jouable compte-tenu de la progression des piles"""
+        """Retourne un booleen indiquant si le numéro indiqué est jouable compte-tenu de la progression des piles"""
         game = self.game
         for color in list(Color):
                 if game.piles[color] == value - 1:
