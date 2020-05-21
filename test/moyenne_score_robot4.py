@@ -1,5 +1,5 @@
 import hanabi
-from ai_almost_human_lvl3 import Robot_3
+from ai_almost_human_lvl4 import Robot_4
 
 #python3 setup.py install --user
 #cd ..\src & python3 setup.py install --user & cd ..\test	
