@@ -3,7 +3,7 @@ from hanabi.ai import AI
 from hanabi.deck import Color
 from random import randint
 
-class Robot_3(AI):
+class Robot_4(AI):
     "This robot follows human conventions"
     "Dans un premier temps, seulement fonctionnel pour des parties à 2 joueurs"
 
