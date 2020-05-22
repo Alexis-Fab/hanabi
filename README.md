@@ -20,6 +20,8 @@ Le premier robot prend ses marques avec le module hanabi,
 
 # Robot 2
 
+La seconde version du robot est capable de finir une partie sans faire d'erreur tout en assurant un score raisonnable.
+Le principe est de considérer qu'un indice donné n'a d'importance que pour une seulle carte. Ainsi, si la notion de bombe est introduite, le robot ne jouera jamais ses bombes à moins de connaître le nombre et la couleur. Le score moyen tourne autour de 14.
 
 # Robot 3
 
@@ -292,8 +294,9 @@ Les deux robots s'articulent autour de fonctions principales :
                                       return("p%d"%(ind_card+1))
  
 
-# Interface graphique GUI
+# Interface graphique
 
-
+- Nous avons d'abord essayé d'utiliser la librairie Qt mais son installation fut compliquée. Nous nous sommes donc plutôt orientés vers tkinter. 
+- Problèmes rencontrés : Difficulté à afficher les indices sur les cartes, maîtrise du placement des widgets avec grid, nécessité de faire une classe window sinon les intialisations se font à chaque tour de boucle.
   
 
