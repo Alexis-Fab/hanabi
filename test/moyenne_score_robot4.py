@@ -14,9 +14,10 @@ failures = 0
 for i in range(0,N):
 	game = hanabi.Game(2)  # 2 players
 	game.quiet = True
+	game.only_robots = True
 	ai = Robot_4(game)
 	ai.quiet = True
-	#ai = my_new_smart_ai.RandomAI(game)
+
 
 	# pour jouer toute une partie
 	game.ai = ai
