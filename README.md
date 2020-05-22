@@ -140,7 +140,7 @@ Les deux robots s'articulent autour de fonctions principales :
 
 
                 other_first_bomb = None
-                indic = None                                       #indique si la carte sélectionnée se trouve malheureusment être la prochaine bombe à être jouée par le partenaire: s'il joue la même après le robot, c'est red coin
+                indic = None                                       
                 for ind_other_hand in range(0,len(self.other_hands)):
                     other_hand = self.other_hands[ind_other_hand]
                     for ind_other_card in range(len(other_hand.cards)-1,-1,-1):
@@ -157,22 +157,13 @@ Les deux robots s'articulent autour de fonctions principales :
                     for ind_card in range(len(hand.cards)-1,-1,-1):
                         card = hand.cards[ind_card]
                         if self.is_playable(card) & (not card.bomb): # & ((choice != "c5") or (card.number == 1))
-                        #    self.log(not card.color_clue[0],not self.conflit(hand,ind_card,str(card.color)[0]))
                             if (not card.color_clue[0]) & (not self.conflit(hand,ind_card,str(card.color)[0])):
                                 (nb_clues,nb_bombs) = self.col_clue_score(hand,card)
-                               # if (nb_clues,nb_bombs) == (0,5):
-                                   # self.log("%s is playable but col_clue would lead to another unplayable card being played before"%str(card))
-                               # else:
-                                   # self.log("%s is playable and col_clue would lead to %d clues and %d bombs"%(str(card),nb_clues,nb_bombs))
                                 if ( (nb_bombs < nb_bombs_given) & (nb_clues > 0) ) or ( (nb_bombs == nb_bombs_given) & (nb_clues > nb_clues_given) ):
                                     (nb_clues_given,nb_bombs_given) = (nb_clues,nb_bombs)
                                     choice = ("c%c"%(str(card.color)[0]))
                             if (not card.number_clue[0]) & (not self.conflit(hand,ind_card,card.number)):
                                 (nb_clues,nb_bombs) = self.num_clue_score(hand,card)
-                                #if (nb_clues,nb_bombs) == (0,5):
-                                   # self.log("%s is playable but num_clue would lead to another unplayable card being played before"%str(card))
-                                #else:
-                                    #self.log("%s is playable and num_clue would lead to %d clues and %d bombs"%(str(card),nb_clues,nb_bombs))
                                 if ( (nb_bombs < nb_bombs_given) & (nb_clues > 0) ) or ( (nb_bombs == nb_bombs_given) & (nb_clues > nb_clues_given) ):
                                     (nb_clues_given,nb_bombs_given) = (nb_clues,nb_bombs)
                                     choice = ("c%d"%(card.number))
@@ -212,3 +203,8 @@ Les deux robots s'articulent autour de fonctions principales :
                 if there_is_5:
                     self.log("robot shows the 5")
                     return("c5")
+                    
+                    
+ 
+-
+
