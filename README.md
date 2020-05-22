@@ -206,5 +206,94 @@ Les deux robots s'articulent autour de fonctions principales :
                     
                     
  
--
+- La fonction try_to_play_safely() parcourt les cartes du robot et retourne, s'il existe, un indice pour jouer une carte certaine d'être jouable d'après les indices à disposition
+  - La fonction parcourt une première fois les cartes du robot pour voir s'il détient des cartes entèrement connues jouables ou des 1 jouables, et les joue le cas échéant
+  - Ensuite, si le robot n'a pas de tels indices, la fonction joue ses cartes à indices pertinents.
+  - Cependant, avant de jouer une telle carte, la fonction vérifie qu'il n'y a pas de conflit avec la prochaine bombe du partenaire.
+  
+  
+ 
+ 
+        def try_to_play_card_safely(self):
+              """Joue une carte qui n'est pas une bombe si les indices indiquent de le faire"""
+              game = self.game
+              for ind_card in range(len(game.current_hand.cards)-1,-1,-1):
+                  card = game.current_hand.cards[ind_card]
+                  if (card.number_clue[0] == '1') and (self.min_piles() == 0) and ( ( (not card.color_clue[0]) and (not card.bomb) ) or (card.color_clue[0] and (self.is_playable(card)) )):
+
+                      #self.log("robot plays a 1")
+                      return("p%d"%(ind_card+1))
+                  if ( not(not card.color_clue[0])) & (not(not card.number_clue[0]) ):
+                      if self.is_playable(card):
+                          #self.log("robot plays knows the color and the number of a playable card")
+                          return("p%d"%(ind_card+1))
+              for ind_card in range(len(game.current_hand.cards)-1,-1,-1):
+                  card = game.current_hand.cards[ind_card]
+                  if not (card.color_clue[0] and card.number_clue[0]):
+            #          self.log(card.number_clue[0],self.min_piles(),card.color_clue[0],card.bomb,self.is_playable(card))
+                      if ( (not(not card.color_clue[0])) or (not(not(card.number_clue[0])))) & (not card.bomb) & (not card.crucial):
+
+                          if card.number_clue[0] != False:
+                              if self.possibly_playable(int(card.number_clue[0])):
+
+                                  other_first_bomb = None
+                                  indicateur_1 = None                                       #indique si la carte sélectionnée se trouve malheureusment être la prochaine bombe à être jouée par le partenaire: s'il joue la même après le robot, c'est red coin
+                                  for ind_other_hand in range(0,len(self.other_hands)):
+                                      other_hand = self.other_hands[ind_other_hand]
+                                      for ind_other_card in range(len(other_hand.cards)-1,-1,-1):
+                                          other_card = other_hand.cards[ind_other_card]
+                                          if (other_card.bomb and (indicateur_1 == None)):
+                                              indicateur_1 = False
+                                              other_first_bomb = other_card                     #indicateur indique que la première bombe en partant de la droite est atteinte mais que, pour l'instant, rien ne dit que c'est la même que celle que le robot veut jouer
+                                              if (other_card.number_clue[0] == card.number_clue[0]):
+                                                  indicateur_1 = True
+                                                  #self.log("danger next bomb partenaire spotted")
+
+                                  indicateur_3 = False                                        #indque si la prochaine bombe du partenaire n'est pas jouable
+                                  if (other_first_bomb != None):
+                                      self.log(other_first_bomb, "est la prochaine bombe (safely)")
+                                      if (not self.is_playable(other_first_bomb)):
+                                          indicateur_3 = True
+
+                                  if (indicateur_3 != True):
+                                      self.log("applique indice pertinent du partenaire")
+                                      return("p%d"%(ind_card+1))
+                          if card.color_clue[0] != False:
+                              if game.piles[card.color] < 5:
+
+                                  other_first_bomb = None
+                                  indicateur_1 = None                                       #indique si la carte sélectionnée se trouve malheureusment être la prochaine bombe à être jouée par le partenaire: s'il joue la même après le robot, c'est red coin
+                                  for ind_other_hand in range(0,len(self.other_hands)):
+                                      other_hand = self.other_hands[ind_other_hand]
+                                      for ind_other_card in range(len(other_hand.cards)-1,-1,-1):
+                                          other_card = other_hand.cards[ind_other_card]
+                                          if (other_card.bomb and (indicateur_1 == None)):
+                                              other_first_bomb = other_card
+                                              indicateur_1 = False                          #indicateur indique que la première bombe en partant de la droite est atteinte mais que, pour l'instant, rien ne dit que c'est la même que celle que le robot veut jouer
+                                              if (other_card.color_clue[0] == card.color_clue[0]):
+                                                  indicateur_1 = True
+                                                  self.log("danger next bomb partenaire spotted")
+
+
+                                  indicateur_2 = False                                #indique un autre problème lié à la prochaine carte bombe du partenaire
+                                  if (other_first_bomb != None):                          
+                                      if (other_first_bomb.color == card.color) and (game.piles[card.color] + 2 != other_first_bomb.number):
+                                          self.log("danger next bomb partenaire spotted")
+                                          indicateur_2 = True
+
+                                  indicateur_3 = False
+                                  if (other_first_bomb != None):
+                                      self.log(other_first_bomb, "est la prochaine bombe (safely)")
+                                      if (not self.is_playable(other_first_bomb)):
+                                          indicateur_3 = True
+
+                                  if (indicateur_2 != True) and (indicateur_3 != True):
+                                      self.log("applique indice pertinent du partenaire")
+                                      return("p%d"%(ind_card+1))
+ 
+
+# Interface graphique GUI
+
+
+  
 
