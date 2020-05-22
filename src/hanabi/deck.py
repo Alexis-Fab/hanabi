@@ -208,6 +208,7 @@ class Game:
         }
         self.reset(players, multi)
         self.quiet = False
+        self.only_robots = False
 
 
     def log(self, *args, **kwargs):
@@ -489,10 +490,13 @@ class Game:
                     except ValueError:
                         pass  # if Alice 'x', she is removed but plays again
                 self.log(self.players[self.current_player])
-                if self.players[self.current_player] == "Alice":
-                    self.turn(None)
-                else:
+                if self.only_robots:
                     self.turn(self.ai)
+                else:
+                    if self.players[self.current_player] == "Alice":
+                        self.turn(None)
+                    else:
+                        self.turn(self.ai)
                 if self.score == 25:
                     raise StopIteration("it is perfect!")
 #            self.log("Game finished because deck exhausted")
