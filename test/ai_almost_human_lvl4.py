@@ -129,7 +129,7 @@ class Robot_4(AI):
                             card.crucial = self.last_rep(card)
                         if card.number_clue[0] == '5':
                             card.crucial = True
-                        if (card.number_clue[1] == 1) & (not self.possibly_playable(int(card.number_clue[0]))):
+                        elif (card.number_clue[1] == 1) & (not self.possibly_playable(int(card.number_clue[0]))):
                             card.crucial = True
                             for ind_card2 in range(0,ind_card):
                                 card2 = cards[ind_card2]
