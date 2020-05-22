@@ -13,7 +13,6 @@ class Robot_4(AI):
 
     def play(self):
         game = self.game
-        #self.log(game.examine_piles())
         have_clue = self.have_clue()
 
         for ind_card in range(len(game.current_hand.cards)-1,-1,-1):
@@ -39,34 +38,27 @@ class Robot_4(AI):
                 self.try_to_save_a_bomb()
 
         risk = self.situation_is_risky()
-        #self.log("risk is",risk)
         self.log("Is the situation risky ? ",risk != False) #FIX ME rajouter les bombes jouées au prochain tour dans risky <-- elles sont déjà prises en compte
         if (risk != False) & (game.blue_coins > 0):
             self.log("situation is risky")
             ind_chop_card = risk
             if not self.possibly_playable((self.other_hands[0].cards[ind_chop_card]).number): # ie chop_card la carte FIX ME ceci n'est pas la carte qui sera défaussée !!! si ce n'est pas le cas, il faudra utiliser punish
-                #self.log("Robot saves playable chop card")
                 return("c%d"%(self.other_hands[0].cards[0]).number)
             if self.give_relevant_clue() != None:
-                #self.log("Robot gives a playable clue")
+                self.log("Robot gives a playable clue")
                 return(self.give_relevant_clue())
             if self.give_discardable_clue() != None:
-                #self.log("Robot gives a discardable clue")
+                self.log("Robot gives a discardable clue")
                 return(self.give_discardable_clue())
-      #      if self.give_punish_clue() != None:     FIX ME à écrire, attention différence entre carte qui sera défaussée et carte à côté du punish
-     #           return(self.give_punish_clue())
 
-        #self.log("Robot possède des indices ? ",have_clue)
         if have_clue:
             temp = self.try_to_play_card_safely(game.current_hand)
-            #self.log("play_safely = ",temp)
             if temp != None:
                 self.log("Robot plays safely")
                 return(temp)
         if game.blue_coins > 0:
             temp = self.give_relevant_clue()
             if temp != None:
-                #self.log("Robot gives a playable clue or saves a bomb")
                 return(temp)
 
         temp = self.try_to_play_a_bomb(game.current_hand)
@@ -77,7 +69,7 @@ class Robot_4(AI):
         if game.blue_coins == 8:
             temp = self.give_discardable_clue()
             if temp != None:
-                #self.log("Robot gives a discardable clue")
+                self.log("Robot gives a discardable clue")
                 return(temp)
             self.log("Robot gives a random clue") # FIX ME réfléchir à une optimisation
             return(self.give_random_clue())
@@ -86,50 +78,40 @@ class Robot_4(AI):
 
     def have_clue(self):
         """Retourne un booleen indiquant si le robot a des indices, et détermine les bombes de son jeu en les analysant"""
-       # self.log("Robot looks for clues")
+        self.log("Robot looks for clues")
         game = self.game
         res = False
         clue_is_bomb = False #permet de savoir quel indice est celui pertinent et lesquels sont des bombes
         for ind_card in range(len(game.current_hand.cards)-1,-1,-1):
             card = game.current_hand.cards[ind_card]
             if card.color_clue[0]:
-               # self.log(card," has a color clue")
                 res = True
                 card.color_clue[1] += 1
-               # self.log(card,"has been given %d turns ago"%card.color_clue[1])
-               # self.log("clue_is_bomb",clue_is_bomb)
                 if card.color_clue[1] == 1:
                     if clue_is_bomb & (not card.number_clue[0]):
                         self.log(card,"is spotted as a bomb")
                         card.bomb = True
                     clue_is_bomb = True
                 if card.number_clue[0]:
-                   # self.log("robot reset bomb to False coz it knows the whole card")
                     card.bomb = False
             if card.number_clue[0] and card.number_clue[0] != '5':
-               # self.log(card,"has a number clue")
                 res = True
                 card.number_clue[1] += 1
-               # self.log(card,"has been given %d turns ago"%card.number_clue[1])
-               # self.log("clue_is_bomb",clue_is_bomb)
                 if card.number_clue[1] == 1:
                     if clue_is_bomb & (not card.color_clue[0]):
                         self.log(card,"is spotted as a bomb")
                         card.bomb = True
                     clue_is_bomb = True
                 if card.color_clue[0]:
-                   # self.log("robot reset bomb to False coz it knows the whole card")
                     card.bomb = False
             if card.crucial:
                 card.bomb=False
-      #  self.log("Robot knows its clues and spotted the bombs")
         return(res)
 
     def set_crucial_cards(self): #FIX ME comment savoir si la carte jouée précédemment était une punish ou si un random clue à été donné ? (ie comment avoir accès à l'historique des actions/résultats)
         
         """Détermine les cartes cruciales de son jeu qui ne doivent à aucun prix être défaussées"""
         game = self.game          # FIX ME les discardable cards ne doivent pas être cruciales !
-        #self.log("robot sets the crucial cards")
         cards = game.current_hand.cards
         for ind_card in range(0,len(cards)):
             card=cards[ind_card]
@@ -148,8 +130,6 @@ class Robot_4(AI):
                                 card2 = cards[ind_card2]
                                 if (not card2.number_clue[0]) & (not card2.color_clue[0]):
                                     card2.crucial = True
-            #if card.crucial:
-                #self.log((card.color_clue[0] or '*') + (card.number_clue[0] or '*')," is crucial !")
 
 
     def is_playable(self,card): # retourne si la carte peut être jouée sans risque
@@ -163,16 +143,13 @@ class Robot_4(AI):
             card = game.current_hand.cards[ind_card]
             if (card.number_clue[0] == '1') and (self.min_piles() == 0) and ( ( (not card.color_clue[0]) and (not card.bomb) ) or (card.color_clue[0] and (self.is_playable(card)) )):
               
-                #self.log("robot plays a 1")
                 return("p%d"%(ind_card+1))
             if card.color_clue[0] and card.number_clue[0]:
                 if self.is_playable(card):
-                    #self.log("robot plays knows the color and the number of a playable card")
                     return("p%d"%(ind_card+1))
         for ind_card in range(len(game.current_hand.cards)-1,-1,-1):
             card = game.current_hand.cards[ind_card]
             if not (card.color_clue[0] and card.number_clue[0]):
-      #          self.log(card.number_clue[0],self.min_piles(),card.color_clue[0],card.bomb,self.is_playable(card))
                 if ( card.color_clue[0] or card.number_clue[0]) and (not card.bomb) and (not card.crucial):
                     
                     if card.number_clue[0] != False:
@@ -189,7 +166,6 @@ class Robot_4(AI):
                                         other_first_bomb = other_card                     #indicateur indique que la première bombe en partant de la droite est atteinte mais que, pour l'instant, rien ne dit que c'est la même que celle que le robot veut jouer
                                         if (other_card.number_clue[0] == card.number_clue[0]):
                                             indicateur_1 = True
-                                            #self.log("danger next bomb partenaire spotted")
 
                             indicateur_3 = False                                        #indque si la prochaine bombe du partenaire n'est pas jouable
                             if (other_first_bomb != None):
@@ -289,8 +265,7 @@ class Robot_4(AI):
             hand = self.other_hands[ind_hand]
             for ind_card in range(len(hand.cards)-1,-1,-1):
                 card = hand.cards[ind_card]
-                if self.is_playable(card) & (not card.bomb): # & ((choice != "c5") or (card.number == 1))
-                #    self.log(not card.color_clue[0],not self.conflit(hand,ind_card,str(card.color)[0]))
+                if self.is_playable(card) & (not card.bomb):
                     if (not card.color_clue[0]) & (not self.conflit(hand,ind_card,str(card.color)[0])):
                         (nb_clues,nb_bombs) = self.col_clue_score(hand,card)
                        # if (nb_clues,nb_bombs) == (0,5):
@@ -321,7 +296,6 @@ class Robot_4(AI):
 
                 if (card.number == 5) & (not card.number_clue[0]) & (not self.possibly_playable(5)) & (ind_card-2 < int(self.discard_at_all_costs(hand)[1]))-1:
                     if (not self.conflit(hand,ind_card,"5")):
-                        #self.log("choice before 5 was %s"%choice)
                         there_is_5 = True
 
         
@@ -357,10 +331,7 @@ class Robot_4(AI):
         already_given = []
         for ind_card in range(len(hand.cards)-1,-1,-1):
             card = hand.cards[ind_card]
-       #     self.log(str(card))
-         #  self.log(card.number,c.number,card.number_clue[0])
             if (card.number == c.number) & (not card.number_clue[0]):
-        #        self.log(game.piles[card.color])
                 if (game.piles[card.color] == (c.number-1)) & (nb_bombs == 0) & (card.color not in already_given):
                     nb_clues += 1
                     already_given.append(card.color)
@@ -397,11 +368,9 @@ class Robot_4(AI):
             for ind_card in range(0,len(hand.cards)):
                 card = hand.cards[ind_card]
                 if card.number <= self.min_piles():
-                    #self.log("cardnumb <= min pile",card)
                     return ("c%d"%(card.number))
                 if card.color_clue[0]:
                     if game.piles[card.color] == 5:
-                        #self.log("cardcolor is full",card)
                         return ("c%s"%(str(card.color)[0]))
 
     def give_punish_clue(self):
@@ -426,7 +395,7 @@ class Robot_4(AI):
 
     def discard_at_all_costs(self,hand):
         game = self.game
-        for ind_card in range(0,len(hand.cards)): # FIX ME redondant ?
+        for ind_card in range(0,len(hand.cards)):
             card = hand.cards[ind_card]
             if card.color_clue[0]:
                 if game.piles[card.color] == 5:
@@ -445,14 +414,6 @@ class Robot_4(AI):
         game = self.game
         for ind_hand in range(0,len(self.other_hands)):
             hand = self.other_hands[ind_hand]
-        #     chop_card = hand.cards[0]
-        #     ind_card = 0
-        #     while ((chop_card.number_clue[0] != False) & (ind_card<(len(hand.cards)-1))):
-        #         ind_card += 1
-        #         chop_card = hand.cards[ind_card]
-        #     if (ind_card == 4) & (not(not(chop_card.number_clue[0]))):
-        #         return(self.last_rep(hand.cards[0]))
-        #     return(self.last_rep(chop_card))
             ind_chop_card = int(self.discard_at_all_costs(hand)[1])-1
             risky = self.last_rep( hand.cards[ ind_chop_card ] )
             #self.log("la chop_card du partenaire est :",hand.cards[ind_chop_card],"est-ce une carte importante ? ",risky)
@@ -474,7 +435,6 @@ class Robot_4(AI):
         """Utile avant de donner un indice. Retourne un booleen indiquant si dans le reste de la main (à gauche de la carte), il y a une carte possédant la couleur ou le chiffre de l'indice c"""
         game = self.game
         for i in range(ind_card + 1, len(hand.cards)):
-            #self.log(str(hand.cards[i].number) == c,str(hand.cards[i].color)[0] == c)
             if (str(hand.cards[i].number) == c) or (str(hand.cards[i].color)[0] == c):
                 return True
         return False
