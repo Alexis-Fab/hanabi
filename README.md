@@ -50,7 +50,6 @@ Les deux robots s'articulent autour de fonctions principales :
             if self.give_discardable_clue() != None:
                 self.log("Robot gives a discardable clue")
                 return(self.give_discardable_clue())
-
         self.log("Robot possède des indices ? ",have_clue)
         if have_clue:
             temp = self.try_to_play_card_safely()
@@ -63,12 +62,10 @@ Les deux robots s'articulent autour de fonctions principales :
             if temp != None:
                 self.log("Robot gives a playable clue or save a bomb")
                 return(temp)
-
         temp = self.try_to_play_a_bomb()
         if temp != None:
             self.log("Robot tries to play a bomb")
             return(temp)
-
         if game.blue_coins == 8:
             temp = self.give_discardable_clue()
             if temp != None:
