@@ -20,17 +20,22 @@ class Robot_4(AI):
             card = game.current_hand.cards[ind_card]
             if card.bomb:
                 self.log(card,"=bomb")
+                pass
 
         for ind_card in range(len(game.current_hand.cards)-1,-1,-1):
             card = game.current_hand.cards[ind_card]
             if (card.number_clue[0] or card.color_clue[0]) and card.bomb == False:
                 self.log(card,"=indice pertinent")
+                pass
 
         self.set_crucial_cards() # cela identifie les cartes cruciales, nécessite d'avoir mis à jour les indices (have_clue)
 
+        self.log("partner hand" , str(self.other_hands[0]))
         if self.try_to_play_a_bomb(self.other_hands[0]) and (self.try_to_play_card_safely(self.other_hands[0]) is None):
+            self.log(self.try_to_play_a_bomb(self.other_hands[0]))
             ind_other_discard_card=int(self.try_to_play_a_bomb(self.other_hands[0])[1])-1
             if not self.is_playable(self.other_hands[0].cards[ind_other_discard_card]):
+                self.log("Robot saves a bomb")
                 self.try_to_save_a_bomb()
 
         risk = self.situation_is_risky()
@@ -101,7 +106,7 @@ class Robot_4(AI):
                 if card.number_clue[0]:
                    # self.log("robot reset bomb to False coz it knows the whole card")
                     card.bomb = False
-            if card.number_clue[0]:
+            if card.number_clue[0] and card.number_clue[0] != '5':
                # self.log(card,"has a number clue")
                 res = True
                 card.number_clue[1] += 1
@@ -190,7 +195,7 @@ class Robot_4(AI):
                                 if (not self.is_playable(other_first_bomb)):
                                     indicateur_3 = True
 
-                            if (indicateur_3 != True):
+                            if (indicateur_3 != True) and (card.number_clue != '5'):
                                 self.log("applique indice pertinent du partenaire")
                                 return("p%d"%(ind_card+1))
                     if card.color_clue[0] != False:
