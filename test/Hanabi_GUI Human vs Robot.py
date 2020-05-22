@@ -7,7 +7,7 @@ from ai_almost_human_lvl4 import Robot_4
 import tkinter as tk
 from PIL import ImageTk, Image
 
-images_dir = "C:\\Users\\Alexis\\hanabi\\GUI\\Images\\"
+images_dir = "C:\\Users\\Alexis\\hanabi\\test\\GUI\\Images\\"
 
 class GUI():
 
@@ -88,7 +88,6 @@ class GUI():
 		self.image_empty_Y = ImageTk.PhotoImage(Resize_Image(Image.open(images_dir + "empty yellow.jpg"), (180,70)))
 		self.image_empty_P = ImageTk.PhotoImage(Resize_Image(Image.open(images_dir + "empty purple.jpg"), (180,70)))
 		self.image_empty_G = ImageTk.PhotoImage(Resize_Image(Image.open(images_dir + "empty green.jpg"), (180,70)))
-
 
 		self.image_clue1 = ImageTk.PhotoImage(Resize_Image(Image.open(images_dir + "clue1.PNG"), (50,50)))
 		self.image_clue2 = ImageTk.PhotoImage(Resize_Image(Image.open(images_dir + "clue2.PNG"), (50,50)))
@@ -238,6 +237,13 @@ class GUI():
 
 		#Other
 
+		self.label_blue_coins=tk.Label(window, text="Blue coins : 8", fg="blue", bg= "#f2c777", font = ("Courier", 20))
+		self.label_blue_coins.grid(row=22, column=5, columnspan=10, sticky=tk.SW)
+		self.label_mistakes=tk.Label(window, text="Mistakes   : 0", fg="red", bg= "#f2c777", font = ("Courier", 20))
+		self.label_mistakes.grid(row=24, column=5, columnspan=10, sticky=tk.NW)
+		self.label_deck=tk.Label(window, text=str(len(self.game.deck.cards))+" cards remaining", fg="black", bg= "#f2c777", font = ("Courier", 20))
+		self.label_deck.grid(row=24, column=10, columnspan=15, sticky=tk.N)
+
 		self.myFriendlyLabel = tk.Label(window, fg = "#ffcbb3", bg = "#db7337", text = "...", font = ("Courier", 20), width = 40, height = 3)
 		self.myFriendlyLabel.grid(row = 24, rowspan=10, column = 5, columnspan = 25, pady = (0,0))
 
@@ -267,6 +273,7 @@ class GUI():
 
 	def new_turn(self):
 		game=self.game
+		self.label_mistakes.configure(text="Mistakes   : "+str(game.red_coins))
 		if len(game.deck.cards) == 0:
 			if not self.not_finished:
 				self.end_game()
@@ -284,6 +291,9 @@ class GUI():
 			else:
 				self.not_finished -= 1
 			self.myFriendlyLabel.configure(text="This is your last move")
+		self.label_mistakes.configure(text="Mistakes   : "+str(game.red_coins))
+		self.label_blue_coins.configure(text="Blue coins : "+str(game.blue_coins))
+		self.label_deck.configure(text=str(len(game.deck.cards))+" cards remaining")
 		if self.not_finished:
 			hand = game.current_hand
 			partner_hand = game.hands[1]
