@@ -7,8 +7,8 @@ class Robot_1(AI):
 
     def play(self):
         game = self.game
-        print(game.examine_piles())
-        print("Is the situation risky ? ",self.situation_is_risky())
+        self.log(game.examine_piles())
+        self.log("Is the situation risky ? ",self.situation_is_risky())
         (res,clues) = self.have_clue()
         if res:
             for ind_card in range(0,len(game.current_hand.cards)):
@@ -25,7 +25,7 @@ class Robot_1(AI):
                        return("c5")
             if game.blue_coins == 8:
                 return("c%d"%(randint(2,5)))
-        print("Robot should discard")
+        self.log("Robot should discard")
         for ind_card in range(0,len(game.current_hand.cards)):
             if clues[ind_card] == [None,None]:
               return("d%d"%(ind_card+1))
@@ -70,3 +70,9 @@ class Robot_1(AI):
             return(card in game.discard_pile.cards)
         if card.number == 1:
             return(game.discard_pile.cards.count(card) == 2)
+
+    def log(self, *args, **kwargs):
+        if self.quiet:
+            pass
+        else:
+            print(*args, **kwargs)
