@@ -14,11 +14,18 @@ class Robot_4(AI):
     def play(self):
         game = self.game
         #self.log(game.examine_piles())
-        have_clue = self.have_clue() # cela met à jour les indices et les bombes FIX ME ne devraient pas identifier les cartes cruciales comme des bombes ! Nécessite set_crucial_cards avent.. Séparer have_clue de set_bombs ?
+        have_clue = self.have_clue()
+
         for ind_card in range(len(game.current_hand.cards)-1,-1,-1):
             card = game.current_hand.cards[ind_card]
             if card.bomb:
                 self.log(card,"=bomb")
+
+        for ind_card in range(len(game.current_hand.cards)-1,-1,-1):
+            card = game.current_hand.cards[ind_card]
+            if (card.number_clue[0] or card.color_clue[0]) and card.bomb == False:
+                self.log(card,"=indice pertinent")
+
         self.set_crucial_cards() # cela identifie les cartes cruciales, nécessite d'avoir mis à jour les indices (have_clue)
         risk = self.situation_is_risky()
         #self.log("risk is",risk)
@@ -158,31 +165,60 @@ class Robot_4(AI):
                     
                     if card.number_clue[0] != False:
                         if self.possibly_playable(int(card.number_clue[0])):
-                            indicateur = None                                       #indique si la carte sélectionnée se trouve malheureusment être la prochaine bombe à être jouée par le partenaire: s'il joue la même après le robot, c'est red coin
+
+                            other_first_bomb = None
+                            indicateur_1 = None                                       #indique si la carte sélectionnée se trouve malheureusment être la prochaine bombe à être jouée par le partenaire: s'il joue la même après le robot, c'est red coin
                             for ind_other_hand in range(0,len(self.other_hands)):
                                 other_hand = self.other_hands[ind_other_hand]
                                 for ind_other_card in range(len(other_hand.cards)-1,-1,-1):
                                     other_card = other_hand.cards[ind_other_card]
-                                    if (other_card.bomb and (indicateur == None)):
-                                        indicateur = False                          #indicateur indique que la première bombe en partant de la droite est atteinte mais que, pour l'instant, rien ne dit que c'est la même que celle que le robot veut jouer
+                                    if (other_card.bomb and (indicateur_1 == None)):
+                                        indicateur_1 = False
+                                        other_first_bomb = other_card                     #indicateur indique que la première bombe en partant de la droite est atteinte mais que, pour l'instant, rien ne dit que c'est la même que celle que le robot veut jouer
                                         if (other_card.number_clue[0] == card.number_clue[0]):
-                                            indicateur = True
-                            #self.log("robot trusts its comrade and plays a no bomb and no crucial card with an acceptable number_clue")
-                            if (indicateur != True):
+                                            indicateur_1 = True
+                                            #self.log("danger next bomb partenaire spotted")
+
+                            indicateur_3 = False                                        #indque si la prochaine bombe du partenaire n'est pas jouable
+                            if (other_first_bomb != None):
+                                self.log(other_first_bomb, "est la prochaine bombe (safely)")
+                                if (not self.is_playable(other_first_bomb)):
+                                    indicateur_3 = True
+
+                            if (indicateur_3 != True):
+                                self.log("applique indice pertinent du partenaire")
                                 return("p%d"%(ind_card+1))
                     if card.color_clue[0] != False:
                         if game.piles[card.color] < 5:
-                            indicateur = None                                       #indique si la carte sélectionnée se trouve malheureusment être la prochaine bombe à être jouée par le partenaire: s'il joue la même après le robot, c'est red coin
+
+                            other_first_bomb = None
+                            indicateur_1 = None                                       #indique si la carte sélectionnée se trouve malheureusment être la prochaine bombe à être jouée par le partenaire: s'il joue la même après le robot, c'est red coin
                             for ind_other_hand in range(0,len(self.other_hands)):
                                 other_hand = self.other_hands[ind_other_hand]
                                 for ind_other_card in range(len(other_hand.cards)-1,-1,-1):
                                     other_card = other_hand.cards[ind_other_card]
-                                    if (other_card.bomb and (indicateur == None)):
-                                        indicateur = False                          #indicateur indique que la première bombe en partant de la droite est atteinte mais que, pour l'instant, rien ne dit que c'est la même que celle que le robot veut jouer
+                                    if (other_card.bomb and (indicateur_1 == None)):
+                                        other_first_bomb = other_card
+                                        indicateur_1 = False                          #indicateur indique que la première bombe en partant de la droite est atteinte mais que, pour l'instant, rien ne dit que c'est la même que celle que le robot veut jouer
                                         if (other_card.color_clue[0] == card.color_clue[0]):
-                                            indicateur = True
-                            #self.log("robot trusts its comrade and plays a no bomb and no crucial card with an acceptable color_clue")
-                            if (indicateur != True):
+                                            indicateur_1 = True
+                                            self.log("danger next bomb partenaire spotted")
+
+                            
+                            indicateur_2 = False                                #indique un autre problème lié à la prochaine carte bombe du partenaire
+                            if (other_first_bomb != None):                          
+                                if (other_first_bomb.color == card.color) and (game.piles[card.color] + 2 != other_first_bomb.number):
+                                    self.log("danger next bomb partenaire spotted")
+                                    indicateur_2 = True
+
+                            indicateur_3 = False
+                            if (other_first_bomb != None):
+                                self.log(other_first_bomb, "est la prochaine bombe (safely)")
+                                if (not self.is_playable(other_first_bomb)):
+                                    indicateur_3 = True
+
+                            if (indicateur_2 != True) and (indicateur_3 != True):
+                                self.log("applique indice pertinent du partenaire")
                                 return("p%d"%(ind_card+1))
 
     def try_to_play_a_bomb(self):
@@ -206,27 +242,25 @@ class Robot_4(AI):
         bomb_card = None
         there_is_5 = False
         (nb_clues_given,nb_bombs_given) = (0,5)
+
+
+        other_first_bomb = None
+        indic = None                                       #indique si la carte sélectionnée se trouve malheureusment être la prochaine bombe à être jouée par le partenaire: s'il joue la même après le robot, c'est red coin
+        for ind_other_hand in range(0,len(self.other_hands)):
+            other_hand = self.other_hands[ind_other_hand]
+            for ind_other_card in range(len(other_hand.cards)-1,-1,-1):
+                other_card = other_hand.cards[ind_other_card]
+                if (other_card.bomb and (indic == None)):
+                    other_first_bomb = other_card
+                    indic = True
+
+        if (other_first_bomb != None):
+            self.log(other_first_bomb, "est la prochaine bombe (give clue)")
+
         for ind_hand in range(0,len(self.other_hands)):
             hand = self.other_hands[ind_hand]
             for ind_card in range(len(hand.cards)-1,-1,-1):
                 card = hand.cards[ind_card]
-                
-    #                    print(card," is a bomb ? ",card.bomb)
-                # if ((card.number == 1) & (game.piles[card.color] == 0)):
-                #     if (not card.number_clue[0]):
-                #         if (not self.conflit(hand,ind_card,"1")):
-                #             return ("c1")
-                #         if (not card.color_clue[0]) & (not self.conflit(hand,ind_card,str(card.color)[0])):
-                #             return ("c%c"%(str(card.color)[0]))
-                #     if (not self.conflit(hand,ind_card,str(card.color)[0])) & (not(card.color_clue[0])) & card.bomb:
-                #         return ("c"+str(card.color)[0])
-                # if self.is_playable(card) & (not card.color_clue[0]):
-                #     if (not self.conflit(hand,ind_card,str(card.color)[0])):
-                #         return("c%c"%(str(card.color)[0]))                            
-                # if ((card.number == 5) & (not card.number_clue[0])):
-                #     if (not self.conflit(hand,ind_card,"5")):
-                #         return("c5")
-                #self.log("Is %s a bomb ? %r"%(str(card),card.bomb))
                 if self.is_playable(card) & (not card.bomb): # & ((choice != "c5") or (card.number == 1))
                 #    self.log(not card.color_clue[0],not self.conflit(hand,ind_card,str(card.color)[0]))
                     if (not card.color_clue[0]) & (not self.conflit(hand,ind_card,str(card.color)[0])):
@@ -249,28 +283,40 @@ class Robot_4(AI):
                             choice = ("c%d"%(card.number))
                 elif card.bomb & (not self.is_playable(card)):
                     if (not card.color_clue[0]) & (not self.conflit(hand,ind_card,str(card.color)[0])): # elle a donc un indice sur le nombre
-                        if bomb_choice == None:
-                            bomb_card = card
-                            bomb_choice = ("c%c"%(str(card.color)[0]))
-                        elif self.last_rep(card) & ((not self.last_rep(bomb_card)) or (bomb_card.number < card.number)):
-                            bomb_card = card
-                            bomb_choice = ("c%c"%(str(card.color)[0]))
-
-                   # self.log(card,"there is no number conflit")
+                        if (other_first_bomb != None):
+                            if (card == other_first_bomb):
+                                bomb_choice = ("c%c"%(str(card.color)[0]))
                     if (not card.number_clue[0]) & (not self.conflit(hand,ind_card,card.number)): # elle a donc un indice sur la couleur
-                        if bomb_choice == None:
-                            bomb_card = card
-                            bomb_choice = ("c%d"%(card.number))
-                        else:
-                        #if self.last_rep(card) & ((not self.last_rep(bomb_card)) or (bomb_card.number < card.number)):
-                            bomb_card = card
-                            bomb_choice = ("c%d"%(card.number))
+                        if (other_first_bomb != None):
+                            if (card == other_first_bomb):
+                                bomb_choice = ("c%d"%(card.number))
+
+                #        if bomb_choice == None:
+                #            bomb_card = card
+                #            bomb_choice = ("c%c"%(str(card.color)[0]))
+                #        elif self.last_rep(card) & ((not self.last_rep(bomb_card)) or (bomb_card.number < card.number)):
+                #            bomb_card = card
+                #            bomb_choice = ("c%c"%(str(card.color)[0]))
+                #
+                #   # self.log(card,"there is no number conflit")
+                #    if (not card.number_clue[0]) & (not self.conflit(hand,ind_card,card.number)): # elle a donc un indice sur la couleur
+                #        if bomb_choice == None:
+                #            bomb_card = card
+                #            bomb_choice = ("c%d"%(card.number))
+                #        else:
+                #        #if self.last_rep(card) & ((not self.last_rep(bomb_card)) or (bomb_card.number < card.number)):
+                #            bomb_card = card
+                #            bomb_choice = ("c%d"%(card.number))
                 if (card.number == 5) & (not card.number_clue[0]) & (not self.possibly_playable(5)) & (choice is None): #FIX ME le choix c5 devrait se faire en dehors de la boucle pour juger correctement
                     if (not self.conflit(hand,ind_card,"5")):
                         #self.log("choice before 5 was %s"%choice)
                         there_is_5 = True
 
         
+        if bomb_choice != None:
+            self.log("robot saves a bomb")
+            return(bomb_choice)
+            
         if choice != None:
             res = False
             for ind_card in range(0,len(game.current_hand.cards)):
@@ -285,9 +331,6 @@ class Robot_4(AI):
                 return(bomb_choice)
             return (choice)
 
-        if bomb_choice != None:
-            self.log("robot saves a bomb")
-            return(bomb_choice)
         if there_is_5:
             self.log("robot shows the 5")
             return("c5")
