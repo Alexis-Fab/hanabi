@@ -21,7 +21,7 @@ Le premier robot prend ses marques avec le module hanabi,
 # Robot 2
 
 La seconde version du robot est capable de finir une partie sans faire d'erreur tout en assurant un score raisonnable.
-Le principe est de considérer qu'un indice donné n'a d'importance que pour une seulle carte. Ainsi, si la notion de bombe est introduite, le robot ne jouera jamais ses bombes à moins de connaître le nombre et la couleur. Le score moyen tourne autour de 14.
+Le principe est de considérer qu'un indice donné n'a d'importance que pour une seule carte. Ainsi, si la notion de bombe est introduite, le robot ne jouera jamais ses bombes à moins de connaître le nombre et la couleur. Le score moyen tourne autour de 14.
 
 # Robot 3
 
