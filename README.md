@@ -299,4 +299,4 @@ Les deux robots s'articulent autour de fonctions principales :
 - Nous avons d'abord essayé d'utiliser la librairie Qt mais son installation fut compliquée. Nous nous sommes donc plutôt orientés vers tkinter. 
 - Problèmes rencontrés : Difficulté à afficher les indices sur les cartes, maîtrise du placement des widgets avec grid, nécessité de faire une classe window sinon les intialisations se font à chaque tour de boucle.
   
-
+- Afin d'utiliser notre interface graphique, il est nécessaire d'avoir le module PIL. Ce dernier s'installe via la commande "pip install Pillow". Il est aussi nécessaire de modifier le chemin d'acccès au dossier images ligne 10.
