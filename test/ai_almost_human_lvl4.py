@@ -120,6 +120,8 @@ class Robot_4(AI):
                 if card.color_clue[0]:
                    # self.log("robot reset bomb to False coz it knows the whole card")
                     card.bomb = False
+            if card.crucial:
+                card.bomb=False
       #  self.log("Robot knows its clues and spotted the bombs")
         return(res)
 
@@ -317,22 +319,6 @@ class Robot_4(AI):
                             if (card == other_first_bomb):
                                 bomb_choice = ("c%d"%(card.number))
 
-                #        if bomb_choice == None:
-                #            bomb_card = card
-                #            bomb_choice = ("c%c"%(str(card.color)[0]))
-                #        elif self.last_rep(card) & ((not self.last_rep(bomb_card)) or (bomb_card.number < card.number)):
-                #            bomb_card = card
-                #            bomb_choice = ("c%c"%(str(card.color)[0]))
-                #
-                #   # self.log(card,"there is no number conflit")
-                #    if (not card.number_clue[0]) & (not self.conflit(hand,ind_card,card.number)): # elle a donc un indice sur la couleur
-                #        if bomb_choice == None:
-                #            bomb_card = card
-                #            bomb_choice = ("c%d"%(card.number))
-                #        else:
-                #        #if self.last_rep(card) & ((not self.last_rep(bomb_card)) or (bomb_card.number < card.number)):
-                #            bomb_card = card
-                #            bomb_choice = ("c%d"%(card.number))
                 if (card.number == 5) & (not card.number_clue[0]) & (not self.possibly_playable(5)) & (ind_card-2 < int(self.discard_at_all_costs(hand)[1]))-1:
                     if (not self.conflit(hand,ind_card,"5")):
                         #self.log("choice before 5 was %s"%choice)
