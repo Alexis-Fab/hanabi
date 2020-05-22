@@ -209,6 +209,7 @@ class Game:
         self.reset(players, multi)
         self.quiet = False
 
+
     def log(self, *args, **kwargs):
         if self.quiet:
             pass
@@ -487,9 +488,9 @@ class Game:
                         last_players.remove(self.players[self.current_player])
                     except ValueError:
                         pass  # if Alice 'x', she is removed but plays again
-                
+                self.log(self.players[self.current_player])
                 if self.players[self.current_player] == "Alice":
-                    self.turn()
+                    self.turn(None)
                 else:
                     self.turn(self.ai)
                 if self.score == 25:
