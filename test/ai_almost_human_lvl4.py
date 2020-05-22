@@ -27,13 +27,19 @@ class Robot_4(AI):
                 self.log(card,"=indice pertinent")
 
         self.set_crucial_cards() # cela identifie les cartes cruciales, nécessite d'avoir mis à jour les indices (have_clue)
+
+        if self.try_to_play_a_bomb(self.other_hands[0]) and (self.try_to_play_card_safely(self.other_hands[0]) is None):
+            ind_other_discard_card=int(self.try_to_play_a_bomb(self.other_hands[0])[1])-1
+            if not self.is_playable(self.other_hands[0].cards[ind_other_discard_card]):
+                self.try_to_save_a_bomb()
+
         risk = self.situation_is_risky()
         #self.log("risk is",risk)
         self.log("Is the situation risky ? ",risk != False) #FIX ME rajouter les bombes jouées au prochain tour dans risky <-- elles sont déjà prises en compte
         if (risk != False) & (game.blue_coins > 0):
             self.log("situation is risky")
             ind_chop_card = risk
-            if not self.possibly_playable((self.other_hands[0].cards[0]).number): # ie chop_card la carte FIX ME ceci n'est pas la carte qui sera défaussée !!! si ce n'est pas le cas, il faudra utiliser punish
+            if not self.possibly_playable((self.other_hands[0].cards[ind_chop_card]).number): # ie chop_card la carte FIX ME ceci n'est pas la carte qui sera défaussée !!! si ce n'est pas le cas, il faudra utiliser punish
                 #self.log("Robot saves playable chop card")
                 return("c%d"%(self.other_hands[0].cards[0]).number)
             if self.give_relevant_clue() != None:
@@ -47,7 +53,7 @@ class Robot_4(AI):
 
         #self.log("Robot possède des indices ? ",have_clue)
         if have_clue:
-            temp = self.try_to_play_card_safely()
+            temp = self.try_to_play_card_safely(game.current_hand)
             #self.log("play_safely = ",temp)
             if temp != None:
                 self.log("Robot plays safely")
@@ -58,7 +64,7 @@ class Robot_4(AI):
                 #self.log("Robot gives a playable clue or saves a bomb")
                 return(temp)
 
-        temp = self.try_to_play_a_bomb()
+        temp = self.try_to_play_a_bomb(game.current_hand)
         if temp != None:
             self.log("Robot tries to play a bomb")
             return(temp)
@@ -143,7 +149,7 @@ class Robot_4(AI):
         game = self.game
         return(card.number == (game.piles[card.color]+1))
 
-    def try_to_play_card_safely(self):
+    def try_to_play_card_safely(self,hand):
         """Joue une carte qui n'est pas une bombe si les indices indiquent de le faire"""
         game = self.game
         for ind_card in range(len(game.current_hand.cards)-1,-1,-1):
@@ -220,7 +226,7 @@ class Robot_4(AI):
                                 self.log("applique indice pertinent du partenaire")
                                 return("p%d"%(ind_card+1))
 
-    def try_to_play_a_bomb(self):
+    def try_to_play_a_bomb(self,hand):
         """Joue une carte bombe si elle est jouable, en partant de la droite"""
         game = self.game
         for ind_card in range(len(game.current_hand.cards)-1,-1,-1):
@@ -232,6 +238,22 @@ class Robot_4(AI):
                 if card.color_clue[0]:
                     if game.piles[card.color] != 5:
                         return("p%d"%(ind_card+1))
+
+    def try_to_save_a_bomb(self):
+        game=self.game
+        hand=self.other_hands[0]
+        if self.try_to_play_a_bomb(hand):
+            ind_bomb=int(self.try_to_play_a_bomb(hand)[1])-1
+            card=hand.cards[ind_bomb]
+            if (not card.color_clue[0]) & (not self.conflit(hand,ind_bomb,str(card.color)[0])):
+                self.log("Robot saves a bomb")
+                return("c%c"%(str(card.color)[0]))
+            if (not card.number_clue[0]) & (not self.conflit(hand,ind_bomb,card.number)):
+                self.log("Robot saves a bomb")
+                return("c%d"%(card.number))
+
+
+
 
     def give_relevant_clue(self): #FIX ME give 5 clue even if chop_card is playable
         """Donne un indice au partenaire parmi : carte jouable, sauver une bombe, protéger un 5"""
@@ -306,7 +328,7 @@ class Robot_4(AI):
                 #        #if self.last_rep(card) & ((not self.last_rep(bomb_card)) or (bomb_card.number < card.number)):
                 #            bomb_card = card
                 #            bomb_choice = ("c%d"%(card.number))
-                if (card.number == 5) & (not card.number_clue[0]) & (not self.possibly_playable(5)):
+                if (card.number == 5) & (not card.number_clue[0]) & (not self.possibly_playable(5)) & (ind_card-2 < int(self.discard_at_all_costs(hand)[1]))-1:
                     if (not self.conflit(hand,ind_card,"5")):
                         #self.log("choice before 5 was %s"%choice)
                         there_is_5 = True
