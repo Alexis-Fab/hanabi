@@ -42,12 +42,14 @@ class GUI():
 
 		#define background :
 		background_image = ImageTk.PhotoImage(Image.open(images_dir + "paper-background.jpg"))
-		background_label = tk.Label(window, image=background_image)
-		background_label.place(x=0, y=0, relwidth=1, relheight=1)
+		self.background_label = tk.Label(window, image=background_image)
+		self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
 
 		self.dico_color = {"Blue" : "#0005a3", "Purple" : "#7a1594", "Green" : "green", "Yellow" : "#c99700", "Red" : "#a80a0a"}
 
+		image_looser = ImageTk.PhotoImage(Resize_Image(Image.open(images_dir + "looser.jpg"), (1850,1250)))
+		self.background_looser = tk.Label(window, image=image_looser)
 
 		self.image_back = ImageTk.PhotoImage(Resize_Image(Image.open(images_dir + "back.png"), (170,230)))
 		self.image_back_selected = ImageTk.PhotoImage(Resize_Image(Image.open(images_dir + "back_selected.png"), (170,230)))
@@ -117,8 +119,11 @@ class GUI():
 		## Widgets :
 
 
-		self.button_discard = tk.Button(window, text="Discard", padx=85, pady=10, command = lambda:self.card_discarded()) .grid(row=30,column=5, columnspan=15, sticky=tk.S)
-		self.button_play = tk.Button(window, text="Play Card", padx=80, pady=10, command = lambda:self.card_played()) .grid(row=30,column=15, columnspan=15, sticky=tk.S)
+		self.button_discard = tk.Button(window, text="Discard", padx=85, pady=10, command = lambda:self.card_discarded())
+		self.button_discard.grid(row=30,column=5, columnspan=15, sticky=tk.S)
+		self.button_play = tk.Button(window, text="Play Card", padx=80, pady=10, command = lambda:self.card_played())
+		self.button_play.grid(row=30,column=15, columnspan=15, sticky=tk.S)
+		self.button_quit = tk.Button(window, text="Quit", command=window.destroy, padx=90, pady=10)
 
 		self.button_clue_number = tk.Button(window, width=33, height=2, fg="#ffcbb3", bg = "#db7337", font = ("Courier", 21))
 		self.button_clue_color = tk.Button(window, width=35, height=2, fg="#ffcbb3", font = ("Courier", 20))
@@ -173,7 +178,7 @@ class GUI():
 
 		#Main partenaire :
 
-		tk.Label(window, text="Partner Hand", fg= "#ffcbb3", bg = "#db7337", font = ("Courier", 16), width=12) .grid(row=0, column=5, columnspan=5, sticky=tk.SW)
+		tk.Label(window, text="Partner's Hand", fg= "#ffcbb3", bg = "#db7337", font = ("Courier", 16), width=14) .grid(row=0, column=5, columnspan=5, sticky=tk.SW)
 
 		self.button_partner_1 = tk.Button(window, image = self.image_back, borderwidth=10, command=lambda:self.partner_selection(1))
 		self.button_partner_2 = tk.Button(window, borderwidth=10, image = self.image_back, command=lambda:self.partner_selection(2))
@@ -219,11 +224,11 @@ class GUI():
 
 		#Piles
 
-		self.label_pile_B = tk.Label(window, image=self.image_empty_B, anchor=tk.NW, height=60, width=175) 
-		self.label_pile_G = tk.Label(window, image=self.image_empty_G, anchor=tk.NW, height=60, width=174)
-		self.label_pile_R = tk.Label(window, image=self.image_empty_R, anchor=tk.NW, height=60, width=173)
-		self.label_pile_Y = tk.Label(window, image=self.image_empty_Y, anchor=tk.NW, height=60, width=176)
-		self.label_pile_P = tk.Label(window, image=self.image_empty_P, anchor=tk.NW, height=60, width=176)
+		self.label_pile_B = tk.Label(window, image=self.image_empty_B, anchor=tk.NW, height=60, width=170) 
+		self.label_pile_G = tk.Label(window, image=self.image_empty_G, anchor=tk.NW, height=60, width=170)
+		self.label_pile_R = tk.Label(window, image=self.image_empty_R, anchor=tk.NW, height=60, width=170)
+		self.label_pile_Y = tk.Label(window, image=self.image_empty_Y, anchor=tk.NW, height=60, width=170)
+		self.label_pile_P = tk.Label(window, image=self.image_empty_P, anchor=tk.NW, height=60, width=170)
 
 		self.label_pile_B .grid(row=22, column = 100)
 		self.label_pile_G .grid(row=24, column = 100)
@@ -244,7 +249,7 @@ class GUI():
 		self.label_deck=tk.Label(window, text=str(len(self.game.deck.cards))+" cards remaining", fg="black", bg= "#f2c777", font = ("Courier", 20))
 		self.label_deck.grid(row=24, column=10, columnspan=15, sticky=tk.N)
 
-		self.myFriendlyLabel = tk.Label(window, fg = "#ffcbb3", bg = "#db7337", text = "...", font = ("Courier", 20), width = 40, height = 3)
+		self.myFriendlyLabel = tk.Label(window, fg = "#ffcbb3", bg = "#db7337", text = "Select Partner's cards to give a clue", font = ("Courier", 20), width = 40, height = 3)
 		self.myFriendlyLabel.grid(row = 24, rowspan=10, column = 5, columnspan = 25, pady = (0,0))
 
 
@@ -294,47 +299,61 @@ class GUI():
 		self.label_mistakes.configure(text="Mistakes   : "+str(game.red_coins))
 		self.label_blue_coins.configure(text="Blue coins : "+str(game.blue_coins))
 		self.label_deck.configure(text=str(len(game.deck.cards))+" cards remaining")
+
 		if self.not_finished:
-			hand = game.current_hand
-			partner_hand = game.hands[1]
-			self.label_discard_pile.configure(text="Discard Pile :" + str(game.discard_pile))
-			for ind_card in range(len(partner_hand)):
-				self.dico_partner_buttons[ind_card +1].configure(image = self.dico_images[str(partner_hand.cards[ind_card])])
-				card = partner_hand.cards[ind_card]
-				if card.number_clue[0]:
-					self.dico_partner_clues[ind_card+1][0].configure(image = self.dico_images[card.number_clue[0]])
-					self.dico_partner_clues[ind_card+1][0].grid(row = 20, column = (1+ind_card)*5+2)
-				else:
-					self.dico_partner_clues[ind_card+1][0].grid_forget()
-				if card.color_clue[0]:
-					self.dico_partner_clues[ind_card+1][1].configure(image = self.dico_images[card.color_clue[0]])
-					self.dico_partner_clues[ind_card+1][1].grid(row = 20, column = (1+ind_card)*5+3)
-				else:
-					self.dico_partner_clues[ind_card+1][1].grid_forget()
+			try:
+				hand = game.current_hand
+				partner_hand = game.hands[1]
+				self.label_discard_pile.configure(text="Discard Pile :" + str(game.discard_pile))
+				for ind_card in range(len(partner_hand)):
+					self.dico_partner_buttons[ind_card +1].configure(image = self.dico_images[str(partner_hand.cards[ind_card])])
+					card = partner_hand.cards[ind_card]
+					if card.number_clue[0]:
+						self.dico_partner_clues[ind_card+1][0].configure(image = self.dico_images[card.number_clue[0]])
+						self.dico_partner_clues[ind_card+1][0].grid(row = 20, column = (1+ind_card)*5+2)
+					else:
+						self.dico_partner_clues[ind_card+1][0].grid_forget()
+					if card.color_clue[0]:
+						self.dico_partner_clues[ind_card+1][1].configure(image = self.dico_images[card.color_clue[0]])
+						self.dico_partner_clues[ind_card+1][1].grid(row = 20, column = (1+ind_card)*5+3)
+					else:
+						self.dico_partner_clues[ind_card+1][1].grid_forget()
+				self.print_partner_action()
+				for ind_card in range(len(hand)):
+					card = hand.cards[ind_card]
+					if card.number_clue[0]:
+						self.dico_clues[ind_card+1][0].configure(image = self.dico_images[card.number_clue[0]])
+						self.dico_clues[ind_card+1][0].grid(row = 60, column = (1+ind_card)*5+2)
+					else:
+						self.dico_clues[ind_card+1][0].grid_forget()
+					if card.color_clue[0]:
+						self.dico_clues[ind_card+1][1].configure(image = self.dico_images[card.color_clue[0]])
+						self.dico_clues[ind_card+1][1].grid(row = 60, column = (1+ind_card)*5+3)
+					else:
+						self.dico_clues[ind_card+1][1].grid_forget()
+				for color in list(Color):
+					max_card = str(color)[0]+str(game.piles[color])
+					if int(max_card[1]):
+						self.dico_piles[max_card[0]].configure(image=self.dico_images[max_card])
+			except (KeyboardInterrupt, EOFError, StopIteration) as e:
+				self.myFriendlyLabel.configure(text='Game finished because of' + str(e))
+				pass
 
-			for ind_card in range(len(hand)):
-				card = hand.cards[ind_card]
-				if card.number_clue[0]:
-					self.dico_clues[ind_card+1][0].configure(image = self.dico_images[card.number_clue[0]])
-					self.dico_clues[ind_card+1][0].grid(row = 60, column = (1+ind_card)*5+2)
-				else:
-					self.dico_clues[ind_card+1][0].grid_forget()
-				if card.color_clue[0]:
-					self.dico_clues[ind_card+1][1].configure(image = self.dico_images[card.color_clue[0]])
-					self.dico_clues[ind_card+1][1].grid(row = 60, column = (1+ind_card)*5+3)
-				else:
-					self.dico_clues[ind_card+1][1].grid_forget()
 
 
-			for color in list(Color):
-				max_card = str(color)[0]+str(game.piles[color])
-				if int(max_card[1]):
-					self.dico_piles[max_card[0]].configure(image=self.dico_images[max_card])
-
-
+	def print_partner_action(self):
+		s = self.myFriendlyLabel.cget("text")
+		action = self.game.moves[-1]
+		if action[0] == 'p':
+			self.myFriendlyLabel.configure(text = s + " Partner played " + action)
+		if action[0] == 'c':
+			self.myFriendlyLabel.configure(text = s + " Partner gave the clue " + action[1])
+		if action[0] == 'd':
+			self.myFriendlyLabel.configure(text = s + " Partner discarded " + self.label_discard_pile.cget("text")[-2] + self.label_discard_pile.cget("text")[-1])
 
 
 	def card_played(self) :
+		game=self.game
 		self.button_clue_number.grid_forget()
 		self.button_clue_color.grid_forget()
 		if self.selection == None :
@@ -345,11 +364,25 @@ class GUI():
 				self.myFriendlyLabel.configure(fg="#ffcbb3", bg = "#db7337", text="Well played !")
 			else:
 				self.myFriendlyLabel.configure(fg="#ffcbb3", bg = "#db7337", text="Bad luck :/")
-			self.game.turn("p" + self.selection[-1])
+			try:
+				self.game.turn("p" + self.selection[-1])
+			except (KeyboardInterrupt, EOFError, StopIteration) as e:
+				if game.red_coins == 3:
+					self.label_mistakes.configure(text="Mistakes   : 3")
+					self.myFriendlyLabel.configure(text='Game over : 3 Mistakes')
+					self.end_game()
+				elif game.finished == 0:
+					self.myFriendlyLabel.configure(text='Game finished. Score : ' + str(game.score), bg='red')
+				else:
+					self.myFriendlyLabel.configure(text='Game finished because of' + str(e))
+				self.not_finished=0
+				self.end_game()
+				pass
 			self.dico_buttons[int(self.selection[-1])].configure(image = self.image_back)
 			self.dico_buttons[int(self.selection[-1])].selected = 0
 			self.selection = None
-			self.new_turn()
+			if self.not_finished:
+				self.new_turn()
 
 	def card_discarded(self):
 		self.button_clue_number.grid_forget()
@@ -411,8 +444,18 @@ class GUI():
 			self.new_turn()
 
 	def end_game(self):
-		self.myFriendlyLabel.configure(text="Game is over")
-
+		game=self.game
+		if game.red_coins>2:
+			self.myFriendlyLabel.configure(bg='red')
+			self.background_label.place_forget()
+			self.background_looser.place(x=0, y=0, relwidth=1, relheight=1)
+		for i in range(1,6):
+			self.dico_buttons[i].configure(command=lambda:None)
+			self.dico_partner_buttons[i].configure(command=lambda:None)
+			print(self.dico_partner_buttons[i])
+		self.button_play.grid_forget()
+		self.button_discard.grid_forget()
+		self.button_quit.grid(row=30,column=10, columnspan=15, sticky=tk.S)
 
 
 
